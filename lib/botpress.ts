@@ -6,6 +6,7 @@ import { BlockElementType, BlockType, IActionsBlock, IButtonElement, IImageBlock
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { BotAnswerType } from '../enum/botpress';
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
+import { AppSetting } from '../config/SettingsBotpress';
 // --------------------------------------------------------------
 // currently suppored answertypes Text,QuickReply,Image
 // --------------------------------------------------------------
@@ -97,7 +98,7 @@ export const parseBotAnswer = async (app: IApp, threadId: any, response: any, se
 // -----------------------------------------------
 // Send Answer to Chat
 // -----------------------------------------------
-export const sendMessage = (app: IApp, threadId, sender: IUser, room: IRoom, read: IRead, modify: IModify, message: any, botAlias: string) => {
+export const sendMessage = async (app: IApp, threadId, sender: IUser, room: IRoom, read: IRead, modify: IModify, message: any, botAlias: string): Promise<any> => {
     if (!message) {
         return;
     }
@@ -108,7 +109,8 @@ export const sendMessage = (app: IApp, threadId, sender: IUser, room: IRoom, rea
         .setSender(sender)
         .setUsernameAlias(botAlias)
     //.setEmojiAvatar(':space_invader:');
-    if (threadId) {
+    const valueOfReplyInThread = await read.getEnvironmentReader().getSettings().getValueById(AppSetting.ppBotpressReplyInThread);
+    if (threadId && valueOfReplyInThread) {
         msg.setThreadId(threadId);
     }
 
