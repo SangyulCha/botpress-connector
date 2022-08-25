@@ -109,8 +109,8 @@ export const sendMessage = async (app: IApp, threadId, sender: IUser, room: IRoo
         .setSender(sender)
         .setUsernameAlias(botAlias)
     //.setEmojiAvatar(':space_invader:');
-    const valueOfReplyInThread = await read.getEnvironmentReader().getSettings().getValueById(AppSetting.ppBotpressReplyInThread);
-    if (threadId && valueOfReplyInThread) {
+    const replyInThread = await read.getEnvironmentReader().getSettings().getValueById(AppSetting.ppBotpressReplyInThread);
+    if (threadId && replyInThread) {
         msg.setThreadId(threadId);
     }
 
@@ -135,6 +135,7 @@ export const sendMessage = async (app: IApp, threadId, sender: IUser, room: IRoo
         modify.getCreator().finish(msg).then((result) => resolve(result)).catch((error) => console.error("message" + error));
     });
 }
+
 export const checkIfValidRoom = async (read: IRead, message: IMessage, isQuickReply: boolean, botRoom: string): Promise<boolean> => {
     // -------------------------------------------------------------------------
     // Init Values

@@ -138,7 +138,7 @@ export class BotpressConnectApp extends App implements IPostMessageSent {
 
         const botVersion = await http.get(BotpressConnectApp.botURL + "/version");
 
-        const { text, editedAt, room, id: threadId } = message;
+        const { text, editedAt, room, id, threadId } = message;
         const chatRoom = room as ILivechatRoom;
 
 
@@ -164,16 +164,31 @@ export class BotpressConnectApp extends App implements IPostMessageSent {
             }
         }
 
+        const replyInThread = await read.getEnvironmentReader().getSettings().getValueById(AppSetting.ppBotpressReplyInThread);
 
+        let replyId = id;
 
+        if (!replyInThread) {
+            replyId = message.sender.id;
+        }
 
-        const { data } = await http.post(BotpressConnectApp.botURL + "/api/v1/bots/" + BotpressConnectApp.botID + "/converse/" + message.sender.id, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            content: JSON.stringify(botpressMessage)
-        });
+        if (threadId) {
+            replyId = threadId;
+        }
+
+        const { data } = await http.post(
+            BotpressConnectApp.botURL
+            + "/api/v1/bots/"
+            + BotpressConnectApp.botID
+            + "/converse/"
+            + replyId,
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                content: JSON.stringify(botpressMessage)
+            });
 
         if (!data.responses) {
             return;
@@ -181,10 +196,8 @@ export class BotpressConnectApp extends App implements IPostMessageSent {
 
 
         data.responses.map(async (response) => {
-            await parseBotAnswer(this, threadId, response, sender, chatRoom, read, modify, BotpressConnectApp.botAliasName);
+            await parseBotAnswer(this, id, response, sender, chatRoom, read, modify, BotpressConnectApp.botAliasName);
         });
-
-
     }
 
     private async compareVersion(v1: any, v2: string) {
